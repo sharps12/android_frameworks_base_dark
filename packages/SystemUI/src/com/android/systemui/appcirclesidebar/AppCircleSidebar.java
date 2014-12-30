@@ -25,7 +25,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.*;
 
-import com.android.systemui.cmremix.TriggerOverlayView;
+import com.android.systemui.chaos.TriggerOverlayView;
 import com.android.systemui.R;
 
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class AppCircleSidebar extends TriggerOverlayView implements PackageAdapt
     private PopupMenu mPopup;
     private WindowManager mWM;
     private AlarmManager mAM;
-    
+
     public AppCircleSidebar(Context context) {
         this(context, null);
     }
@@ -470,4 +470,3 @@ public class AppCircleSidebar extends TriggerOverlayView implements PackageAdapt
         showAppContainer(false);
     }
 }
-

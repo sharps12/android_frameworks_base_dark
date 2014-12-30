@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2006 The Android Open Source Project
- * This code has been modified. Portions copyright (C) 2013, ThinkingBridge Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,10 +64,10 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.ScaleAnimation;
@@ -2396,7 +2395,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         final View scrapView = mRecycler.getScrapView(position);
         View child = mAdapter.getView(position, scrapView, this);
-
         if (scrapView != null) {
             if (mListAnimationMode != 0 && !mIsWidget) {
                 child = setAnimation(child);
@@ -2434,6 +2432,24 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
 
         return child;
+    }
+
+    private void setItemViewLayoutParams(View child, int position) {
+        final ViewGroup.LayoutParams vlp = child.getLayoutParams();
+        LayoutParams lp;
+        if (vlp == null) {
+            lp = (LayoutParams) generateDefaultLayoutParams();
+        } else if (!checkLayoutParams(vlp)) {
+            lp = (LayoutParams) generateLayoutParams(vlp);
+        } else {
+            lp = (LayoutParams) vlp;
+        }
+
+        if (mAdapterHasStableIds) {
+            lp.itemId = mAdapter.getItemId(position);
+        }
+        lp.viewType = mAdapter.getItemViewType(position);
+        child.setLayoutParams(lp);
     }
 
     private View setAnimation(View view) {
@@ -2546,24 +2562,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         anim.setDuration(500);
         view.startAnimation(anim);
         return view;
-    }
-
-    private void setItemViewLayoutParams(View child, int position) {
-        final ViewGroup.LayoutParams vlp = child.getLayoutParams();
-        LayoutParams lp;
-        if (vlp == null) {
-            lp = (LayoutParams) generateDefaultLayoutParams();
-        } else if (!checkLayoutParams(vlp)) {
-            lp = (LayoutParams) generateLayoutParams(vlp);
-        } else {
-            lp = (LayoutParams) vlp;
-        }
-
-        if (mAdapterHasStableIds) {
-            lp.itemId = mAdapter.getItemId(position);
-        }
-        lp.viewType = mAdapter.getItemViewType(position);
-        child.setLayoutParams(lp);
     }
 
     class ListItemAccessibilityDelegate extends AccessibilityDelegate {
@@ -3849,6 +3847,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mIsTap = true;
         mActivePointerId = ev.getPointerId(0);
         mInverse.sendEmptyMessageDelayed(0, 100);
+
         if (mTouchMode == TOUCH_MODE_OVERFLING) {
             // Stopped the fling. It is a scroll.
             mFlingRunnable.endFling();
@@ -6036,6 +6035,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 dismissPopup();
             }
         }
+
     }
 
     /**

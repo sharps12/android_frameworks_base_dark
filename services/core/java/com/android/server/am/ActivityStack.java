@@ -1602,6 +1602,7 @@ final class ActivityStack {
         mStackSupervisor.mGoingToSleepActivities.remove(next);
         next.sleeping = false;
         mStackSupervisor.mWaitingVisibleActivities.remove(next);
+        next.waitingVisible = false;
 
         if (DEBUG_SWITCH) Slog.v(TAG, "Resuming " + next);
 
@@ -1693,6 +1694,8 @@ final class ActivityStack {
                 // previous should actually be hidden depending on whether the
                 // new one is found to be full-screen or not.
                 if (prev.finishing) {
+                    if(prev.waitingVisible)
+                        mStackSupervisor.mWaitingVisibleActivities.add(prev);
                     mWindowManager.setAppVisibility(prev.appToken, false);
                     if (DEBUG_SWITCH) Slog.v(TAG, "Not waiting for visible to hide: "
                             + prev + ", waitingVisible="
@@ -2858,6 +2861,7 @@ final class ActivityStack {
         mStackSupervisor.mStoppingActivities.remove(r);
         mStackSupervisor.mGoingToSleepActivities.remove(r);
         mStackSupervisor.mWaitingVisibleActivities.remove(r);
+        r.waitingVisible = false;
         if (mResumedActivity == r) {
             mResumedActivity = null;
         }
@@ -3058,6 +3062,7 @@ final class ActivityStack {
         // down to the max limit while they are still waiting to finish.
         mStackSupervisor.mFinishingActivities.remove(r);
         mStackSupervisor.mWaitingVisibleActivities.remove(r);
+        r.waitingVisible = false;
 
         // Remove any pending results.
         if (r.finishing && r.pendingResults != null) {
